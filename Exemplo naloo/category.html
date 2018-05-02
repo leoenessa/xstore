@@ -1,0 +1,378 @@
+{% extends _layout %}
+{% block content %}
+	{% set type = request.get.type %}
+
+	{# Produtos por linha (a homepage possui outras definicoes) #}
+	{% if template_settings('select:cat_list_prod_cols') == '2' %}
+		{% set col_width = '6' %}
+	{% elseif template_settings('select:cat_list_prod_cols') == '3' %}
+		{% set col_width = '4' %}
+	{% elseif template_settings('select:cat_list_prod_cols') == '4' %}
+		{% set col_width = '3' %}
+	{% elseif template_settings('select:cat_list_prod_cols') == '6' %}
+		{% set col_width = '2' %}
+	{% endif %}
+
+	{# Colunas de Produto na Busca #}
+	{% if term is not empty %}
+		{% if template_settings('select:cat_list_prod_cols') == '2' %}
+			{% set col_width = '3' %}
+		{% elseif template_settings('select:cat_list_prod_cols') == '3' %}
+			{% set col_width = '3' %}
+		{% endif %}	
+	{% endif %}	
+
+	{% import 'product_listing.html' as product_listing %}
+	<div class="row">
+		<div class="col-xs-12">
+			{% include 'breadcrumbs.html' %}
+		</div>
+	</div>
+	<div class="row">
+	    {% if template_settings('if:sidebar') %}
+    		{% if term is empty %}
+    			<div class="col-xs-3 sidebar">
+    				<div class="row">
+    					{# Categorias #}
+					    {% if categories[category.root_category].children|length > 0 %}
+        					<div class="col-xs-12">
+        						<div class="side-header">{{ categories[category.root_category].category.name }}</div>
+        						<ul>
+        						    {% for category_group in categories[category.root_category].children %}
+            							<li class="{{ category_group.category.id == category.id ? 'active' : 'inactive' }}">
+            								<a href="{{ site_url(categories[category.root_category].category.slug ~ '/' ~ category_group.category.slug) }}">{{ category_group.category.name }}</a>
+            							</li>
+            							{% for cgc in category_group.children %}
+            							    <li class="child {{ cgc.category.id == category.id ? 'active' : 'inactive' }}">
+                								<a href="{{ site_url(categories[category.root_category].category.slug ~ '/' ~ category_group.category.slug ~ '/' ~ cgc.category.slug) }}">{{ cgc.category.name }}</a>
+                							</li>
+            							{% endfor %}
+        						    {% endfor %}
+        						</ul>
+        					</div>
+        				{% endif %}
+        				
+    					{# Filtros Selecionados #}
+    					<div class="col-xs-12">
+    						{% if selected_properties|length > 0 or selected_options|length > 0 or price_max > 0 %}
+    						<div class="side-header"><i class="glyphicon glyphicon-ok"></i> {{ 'Filtros Selecionados'|trans({'en':'Selected Filters'}) }}</div>
+    						<ul class="active-filters list-unstyled buffer-bottom-md" style="display:none;">
+    							{% for property in selected_properties %}
+    							<li><a class="sub" href="#filter_{{ property }}"></a></li>
+    							{% endfor %}
+    						    
+    							{% for selected_option in selected_options %}
+		          	  	            {% set currentFilterColor = '' %}
+		          	  	            
+            						{% for option in global_options %}
+        			          	  		{% if option.name|lower|trim == 'cor' or option.name|lower|trim == 'cores' %}
+    					          	  	    {% for value in option.values %}
+    					          	  	        {% if selected_option == value.id %}
+    					          	  	            {% set currentFilterColor = value.color %}
+    					          	  	        {% endif %}
+            		          	    		{% endfor %}
+            						    {% endif %}
+            						{% endfor %}
+            						
+            						{% if currentFilterColor != '' %}
+            							<li><a class="sub color-filter-select" href="#filter_{{ selected_option }}" style="background: {{ currentFilterColor }}; border: 1px solid #ccc;"></a></li>
+        							{% else %}
+        							    <li><a class="sub" href="#filter_{{ selected_option }}"></a></li>
+    							    {% endif %}
+    							     
+    							{% endfor %}
+    							
+    							{% if price_max %}
+    							<li><a class="price-max" href="#">{{ price_max }}</a></li>
+    							{% endif %}
+    						</ul>
+    						<script type="text/javascript">
+    							$(document).ready(function(){
+    								$('.active-filters .price-max').html('<i class="glyphicon glyphicon-remove"></i> ' + $('.price-filters .active').text());
+    								$('.active-filters .price-max').click(function(e){
+    									e.preventDefault();
+    									$('.price-filters .all').trigger('click');
+    								});
+    								$('.active-filters .sub').each(function(){
+    									$filter = $($(this).attr('href'));
+    									$(this).html('<i class="glyphicon glyphicon-remove"></i> ' + $filter.text());
+    									$(this).click(function(e){
+    										e.preventDefault();
+    								 		$($(this).attr('href')).trigger('click');
+    									});
+    								});
+    								$('.active-filters').show();
+    							});
+    						</script>
+    						{% endif %}
+    					</div>
+    					{# Filtros #}
+    					<div class="col-xs-12">
+    					
+    					    <script>
+                                $(document).ready(function(){
+                                    $(".toogle-menu-cor").click(function(){
+                                        
+                                        $(".sub-menu-toogle-cor").toggle();
+                                        
+                                        if($(this).parent().find(".fa").hasClass("fa-chevron-right")){
+                                            $(this).parent().find(".fa").removeClass("fa-chevron-right");
+                                            $(this).parent().find(".fa").addClass("fa-chevron-down");
+                                        }else if($(this).parent().find(".fa").hasClass("fa-chevron-down")){
+                                            $(this).parent().find(".fa").removeClass("fa-chevron-down");
+                                            $(this).parent().find(".fa").addClass("fa-chevron-right");
+                                        }
+                                        
+                                    });
+                                    
+                                    $(".toogle-menu-tam").click(function(){
+                                        
+                                        $(".sub-menu-toogle-tam").toggle();
+                                        
+                                        if($(this).parent().find(".fa").hasClass("fa-chevron-right")){
+                                            $(this).parent().find(".fa").removeClass("fa-chevron-right");
+                                            $(this).parent().find(".fa").addClass("fa-chevron-down");
+                                        }else if($(this).parent().find(".fa").hasClass("fa-chevron-down")){
+                                            $(this).parent().find(".fa").removeClass("fa-chevron-down");
+                                            $(this).parent().find(".fa").addClass("fa-chevron-right");
+                                        }
+                                        
+                                    });
+                                    
+                                    $(".toogle-menu-prop").click(function(){
+                                        
+                                        $(".sub-menu-toogle-prop").toggle();
+                                        
+                                        if($(this).parent().find(".fa").hasClass("fa-chevron-right")){
+                                            $(this).parent().find(".fa").removeClass("fa-chevron-right");
+                                            $(this).parent().find(".fa").addClass("fa-chevron-down");
+                                        }else if($(this).parent().find(".fa").hasClass("fa-chevron-down")){
+                                            $(this).parent().find(".fa").removeClass("fa-chevron-down");
+                                            $(this).parent().find(".fa").addClass("fa-chevron-right");
+                                        }
+                                        
+                                    });
+                                    
+                                    $(".toogle-menu-preco").click(function(){
+                                        
+                                        $(".sub-menu-toogle-preco").toggle();
+                                        
+                                        if($(this).parent().find(".fa").hasClass("fa-chevron-right")){
+                                            $(this).parent().find(".fa").removeClass("fa-chevron-right");
+                                            $(this).parent().find(".fa").addClass("fa-chevron-down");
+                                        }else if($(this).parent().find(".fa").hasClass("fa-chevron-down")){
+                                            $(this).parent().find(".fa").removeClass("fa-chevron-down");
+                                            $(this).parent().find(".fa").addClass("fa-chevron-right");
+                                        }
+                                        
+                                    });
+                                    
+                                });
+                            </script>
+    					    
+    					    <div class="side-header" style="padding: 15px 0 0px;">{{ 'Filtrar Por'|trans({'en':'Filter by'}) }}</div>
+                            
+                                {% if properties|count > 0 %}
+        	   		 			<ul class="filters-side filters price-filters">
+    	   		 			
+            	   		 			<div class="hide">
+            	   		 			    {% for property in properties %}
+            				          	  	{% for child in property.children %}
+            				          	  	    {% if child.category.id in selected_properties %}
+            				          	  	        <a class="sub active" id="filter_{{ child.category.id }}"href="#filter_property{{ child.category.id }}">{{ child.category.name }}</a>
+            	   		 			            {% endif %}
+            	   		 			        {% endfor %}
+            	   		 			    {% endfor %}
+            	   		 			</div>
+            	   		 		</ul>
+            	   		 		{% endif %}	
+        	   		 	
+        	   		 	   
+        						{% for property in properties %}
+        						    {% set props = filter_active_props(property.children, selected_properties) %}
+        						    {% if category.id in property.category.on_category_ids or property.category.on_category_ids[0] == '' %}
+            						    {% if property.children|count > 0 %}
+            				          	  	{% for child in props %}
+            				          	  	    {% if category.id in child.category.on_category_ids or child.category.on_category_ids[0] == '' %}
+            					          	  	    {% if cat_set == 0 %}
+            					          	  	        {% set property_name = property.category.name %}
+            					          	  	        {% set cat_set = 1 %}
+            					          	  	    {% endif %}
+            					          	  	    {% if child.category.product_count > 0 %}
+                					          	  	    {% if property_name is not empty %}
+                					          	  	        <ul class="filters-side filters price-filters">
+                        									    <div class="side-header toogle-menu-prop" style="text-transform: none; cursor: pointer; padding: 10px 0;">
+                            									    <i class="fa fa-chevron-right" aria-hidden="true" style="margin-right: 10px; width: 12px;"></i>
+                            									    {{ property_name }}
+                    									        </div>
+                    									     
+                        									    {% set property_name = '' %}
+                        									    <div class="sub-menu-toogle-prop" style="display:none;">
+                    									    
+                									    {% endif %}
+                									    
+                    				          	    	<li class="child">
+                    				          	    		<a id="filter_{{ child.category.id }}" class="sub" href="#filter_property{{ child.category.id }}">{{ child.category.name }}</a>
+                    				          	    	</li>
+            									    {% endif %}
+        									    {% endif %}
+            				          	  	{% endfor %}</ul>
+            						    {% endif %}
+        						    {% endif %}
+        						{% endfor %}
+                                
+                    
+        						{% for option in global_options %}
+        						    {% if option.values|count > 0 %}
+        			          	  		{#{% if option.name|lower|trim != 'cor' and option.name|lower|trim != 'cores' %}#}
+        					          	  	{% for value in option.values %}
+        					          	  	    {% if loop.first %}
+        					          	  	        {% set option_name = option.name %}
+        					          	  	    {% endif %}
+        					          	  	    {% if value.product_count > 0 %}
+            					          	  	    {% if option_name is not empty %}
+            					          	  	    
+            					          	  	    <ul class="filters-side filters price-filters">
+                									    <div class="side-header toogle-menu{% if option.name|lower == "tamanho" %}-tam{% else %}-cor{% endif %}" style="text-transform: none; cursor: pointer; padding: 10px 0;">
+                									        <i class="fa fa-chevron-right" aria-hidden="true" style="margin-right: 10px; width: 12px;"></i>
+                									        {{ option_name }}
+                									    </div>
+                									    {% set option_name = '' %}
+                									    
+            									        <div class="sub-menu-toogle{% if option.name|lower == "tamanho" %}-tam {% else %}-cor{% endif %}" style="display:none;">
+            									    
+            									    {% endif %}
+            									    
+            									    {% if option.name|lower == "cor" %}
+                					          	    	<li class="child inline-cor">
+                					      			   		<a id="filter_{{ value.id }}" class="sub" href="#filter_option{{ value.id }}">
+                					      			   		    <span class="s-color" style="background: {{ value.color }}; width: 30px; height: 30px; border: 1px solid #ccc; display: inline-block;"></span>
+                					      			   		</a>
+                				          	    		</li>
+            				          	    		{% else %}
+                				          	    		<li class="child inline">
+                					      			   		<a id="filter_{{ value.id }}" class="sub" href="#filter_option{{ value.id }}">{{ value.name }}</a>
+                				          	    		</li>
+            				          	    		{% endif %}
+            				          	    		
+            				          	    	{% endif %}
+        					          	  	{% endfor %}</ul>
+        		          	    		{#{% endif %}#}
+        						    {% endif %}
+        						{% endfor %}
+        			
+        
+        						{% set range = pricerange.max - pricerange.min %}
+        						{% set first_range = pricerange.min + (range / 3) %}
+        						{% set second_range = pricerange.min + (range / 2) %}
+        
+        						{% if range > 0 %}
+        						    <ul class="filters-side filters price-filters">
+            							<li>
+            							    <div class="side-header toogle-menu-preco" style="text-transform: none; cursor: pointer; padding: 10px 0;">
+                							    <i class="fa fa-chevron-right" aria-hidden="true" style="margin-right: 10px; width: 12px;"></i>{{ 'Preço'|trans({'en':'Price Range'}) }}
+            							    </div>
+            							</li>
+            					  		
+            					  		<div class="sub-menu-toogle-preco" style="display:none;">
+                					  		<li class="child">
+                					  			<a class="sub{{ price_max ? '' : ' active' }} all" href="#" data-min="" data-max="">{{ 'Todos'|trans({'en':'All'}) }}</a>
+                				  			</li>
+                					  	    <li class="child">
+                					  	    	<a class="sub{{ price_max == first_range|round ? ' active' : '' }}" href="#" data-min="{{ pricerange.min }}" data-max="{{ first_range|round }}">{{ pricerange.min|format_currency }} - {{ first_range|round|format_currency }}</a>
+                				  	    	</li>
+                					  	    <li class="child">
+                					  	    	<a class="sub{{ price_max == second_range|round ? ' active' : '' }}" href="#" data-min="{{ first_range|round }}" data-max="{{ second_range|round }}">{{ first_range|round|format_currency }} - {{ second_range|round|format_currency }}</a>
+                				  	    	</li>
+                					  	    <li class="child">
+                					  	    	<a class="sub{{ price_max == pricerange.max ? ' active' : '' }}" href="#" data-min="{{ second_range|round }}" data-max="{{ pricerange.max }}">{{ second_range|round|format_currency }} - {{ pricerange.max|format_currency }}</a>
+                				  	    	</li>
+            				  	    	</div>
+        				  	        </ul>
+        						{% endif %}
+    						
+    					</div>
+    				</div>
+    			</div>
+    		{% endif %}
+		{% endif %}
+		{# Se for busca, a listagem e full #}
+		{% if term is not empty or template_settings('if:sidebar') == 0 %}
+		<div class="col-xs-12">
+		{% else %}
+		<div class="col-xs-9">
+		{% endif %}
+			<div class="row">
+				<div class="col-xs-12">
+					{# Titulo da Página #}
+					{% if term is not empty %}
+						<h2 class="category-header">{{ "Resultado da busca por"|trans({'en':'Results with'}) }} {{ term }}</h2>
+					{% else %}
+						{#<h2 class="category-header">{{ category.name }}</h2>#}
+					{% endif %}
+				</div>
+				{% if category.image is not empty %}
+					<div class="col-xs-12 category-img">
+						{{ category_img(category, 'full', true) }}
+						<hr style="border-color: #E2E2E2; margin: 5px 0px 50px;">
+					</div>
+				{% endif %}
+			</div>
+			<div class="row hide">
+				<div id="filter-widget" class="col-xs-12">
+					{{ global_css('filters.css', true) }}
+					{{ global_js('filters.js', true) }}
+					{# Visivel #}
+					{% if template_settings('if:catalog') == 0 %}
+					<nav class="cat_options">
+						<ul class="filters order">
+						    <li>{{ "Organizar por:"|trans({'en':'Order by:'}) }}</li>
+						    <li><a class="sub" href="#order_price">{{"Menor Preço"|trans({'en':'Cheapest'})}}</a></li>
+						    <li><a class="sub" href="#order_bestseller">{{"Mais Vendidas"|trans({'en':'Most Sold'})}}</a></li>
+						    <li><a class="sub" href="#order_rating">{{"Melhor Nota"|trans({'en':'Best Rating'})}}</a></li>
+						</ul>
+					</nav>
+					{% endif %}
+					{# Invisivel #}
+					{{ form_open(site_url(category.slug), {'id': 'filter_form', 'style': 'display:none;', 'method': 'get'}) }}
+					    {% for prop in properties %}
+					        {% for child in prop.children %}
+					            <input type="checkbox" name="properties[]" value="{{ child.category.id }}" id="filter_property{{ child.category.id }}" {{ selected_properties and child.category.id in selected_properties ? ' checked' : '' }}/>
+					        {% endfor %}
+					    {% endfor %}
+					    {% for option in global_options %}
+					        {% for value in option.values %}
+					            <input type="checkbox" name="options[]" value="{{ value.id }}" id="filter_option{{ value.id }}" {{ selected_options and value.id in selected_options ? ' checked' : '' }}/>
+					        {% endfor %}
+					    {% endfor %}
+					    <input type="checkbox" name="price_max" value="{{ price_max ? price_max : '' }}"{{ price_max ? ' checked' : '' }} />
+					    <input type="checkbox" name="price_min" value="{{ price_min ? price_min : '' }}"{{ price_min ? ' checked' : '' }} />
+					    <input class="order_by_hidden" type="checkbox" name="by" value="price/asc" id="order_price" {{ sort_by == 'sort_price' ? 'checked' : '' }}/>
+					    <input class="order_by_hidden" type="checkbox" name="by" value="bestsellers/desc" id="order_bestseller" {{ sort_by == 'quantity_order' ? 'checked' : '' }}/>
+					    <input class="order_by_hidden" type="checkbox" name="by" value="rating/desc" id="order_rating" {{ sort_by == 'rating' ? 'checked' : '' }}/>
+					{{ form_close() }}
+				</div>
+			</div>
+			<div class="row prod-list cat-prod-list">
+				{{ product_listing.script() }}
+				{% for product in products %}
+					{{ product_listing.item(product, category, col_width) }}
+				{% else %}
+					<div class="col-xs-12">
+						<p class="no-prod">
+							{% if term is not empty %}
+								{{ 'Não foram encontrados resultados para sua busca.'|trans({'en':'No results found using this terms.'}) }}
+							{% else %}
+								{{ lang('no_products') }}
+							{% endif %}
+						</p>
+					</div>
+				{% endfor %}
+			</div>
+			{# Paginacao #}
+			<div class="col-xs-12 text-center">
+				{{ pagination() }}
+			</div>
+		</div>
+	</div>
+{% endblock %}

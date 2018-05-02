@@ -1,0 +1,66 @@
+<ul class="list-inline pull-right">
+    {# BUSCA #}
+    {% if template_settings('layout:header') != 'hed_completo' %}
+    <li id="top-search">
+        {# Busca #} 
+        {{ form_open('cart/search', {id: "form-search"}) }}
+        <div class="input-group">
+            <input type="text" name="term" id="search-engine" class="form-control" placeholder="{{ lang('do_search') }}" autocomplete="off" />
+            <span class="input-group-btn">
+                <button class="btn btn-default" type="button">
+                    <i class="glyphicon glyphicon-search"></i>
+                </button>
+            </span>
+        </div>
+        {# Carregando #}
+        <div id="search-loader">
+            <img src="{{ theme_url('assets/img/ajax-loader.gif') }}" />
+        </div>
+        {# Resultados da pesquisa #}
+        <div id="search-results">
+            <span class="arrowup"></span>
+            <div id="search-results-in"></div>
+        </div>
+        {{ form_close() }}
+    </li>
+    <ul {{ template_settings('layout:header') != 'hed_completo' ? 'class="pull-right"' : '' }}>
+    {% endif %}
+        {% if template_settings('text:t_phone') != "" %}
+        <li>
+            {{ template_settings('text:t_phone') }}
+        </li>
+        {% endif %}
+        {% if template_settings('if:catalog') == 0 %}
+            <li>
+                <a href="{{ site_url('contato') }}">
+                    Atendimento
+                </a>
+            </li>
+            <li>
+                {% if logged_in %}
+                <a href="{{ site_url('secure/logout') }}">
+                    {{ lang('logout') }}
+                </a>
+                {% else %}
+                <a href="{{ site_url('secure/login') }}">
+                    {{ lang('login') }}
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                <a href="{{ site_url('secure/my_account') }}">
+                    {{ lang('my_account') }}
+                </a>
+            </li>
+            <li {{ template_settings('layout:header') == 'hed_completo' ? 'class="pull-right"' : '' }}>
+                <a href="{{ site_url('cart/view_cart') }}" class="cart">
+                    <i class="cart-icon"></i>
+                    <span id="view_cartTotalValue">{{ cart('total')|format_currency }}</span>
+                </a>
+            </li>
+        {% endif %}
+    {% if template_settings('layout:header') != 'hed_completo' %}
+    </ul>
+    {% endif %}
+{# MENU #}
+</ul>
