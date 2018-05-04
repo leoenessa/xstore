@@ -20,10 +20,88 @@
                         
                         <div class="prod-variant-li escolha-checkbox conteudo-look-titulo">
                                 <input type="checkbox" id="{{product.id}}" name="vehicle" value="Bike" checked><label for="{{product.id}}">Incluir este produto</label>
+                            
+<!--
+                                <select name="quantity" class="quant-select">
+                                    {% for i in 1..product.quantity %}
+                                        <option value="{{i}}">{{i}}</option>
+                                    {% endfor %}
+                                </select>
+-->
                         </div>
                         
                         <div class="variants-wrapper clearfix form-group conteudo-look-variantes">
                             <div class="hide">{{ variation_select(product, {'button_selects': true, 'exclude_js': true}) }}</div>
+                            
+                            
+                            
+                            <script type="text/javascript">
+                      s_weight = {
+                            {% for variant in product.variants %}  
+                                {{ variant.id }}: {{ variant.weight }},
+                            {% endfor %}
+                       }   
+
+                      
+                      function setMaxSelect(num,id){ //DEFINE A QUANTIDADE NO SELECT DO PRODUTO
+                        var select = $("select[name=quantity]");
+                        select.empty();
+                        
+                          
+                        for(i=1;i<=num;i++){
+                          select.append($('<option>',{
+                              value:i,
+                              text:i
+                          }))  
+                        }
+                      }
+                      
+                      productvariants_settings_{{ product.id }}.validationSuccess = function(){
+                            //  Weight
+                            var s_id = this['selected_variant']['id'];
+                            var c_weight = s_weight[s_id];
+
+                            if(c_weight > 0) $('input[name=product_weight]').val(c_weight);
+
+                            $('.installment-price').text('R$ ' + (parseFloat(this.selected_variant.price_num) / {{ product.installments }}).toFixed(2).replace('.', ','));
+                            $('.estoque').show();
+                            $('.estoque span').html(parseInt(this.selected_variant.quantity));
+                          console.log(this.selected_variant.id);
+                          setMaxSelect(this.selected_variant.quantity,{{ product.id }});
+                            $('#buy-btn').show();
+
+                            variant_pay_discount(this.selected_variant);
+                      }
+                    
+                      productvariants_settings_{{ product.id }}.validationNotAvailable = function(){
+                              variant_unavailable();
+                              variant_pay_discount(this.selected_variant);
+                      }
+                      
+                      productvariants_settings_{{ product.id }}.validationOutofstock = function(){
+                              variant_unavailable();
+                              variant_pay_discount(this.selected_variant);
+                      }
+                      
+                      var variant_unavailable = function(){
+                          $('#buy-btn').hide();
+                          $('.buy-message').hide();
+                          $('.estoque').hide();
+                          $('.alert-unavailable').removeClass('hide');
+                      }
+                    
+                      var variant_pay_discount = function(sel_variant){
+                            {% if template_settings('if:at_sight') and template_settings('text:at_sight_value') %}
+                                var val_desc = sel_variant.price_num - ({{ (template_settings('text:at_sight_value') / 100) }} * sel_variant.price_num);
+                                val_desc = val_desc.toFixed(2).replace('.', ',');
+                                $('.onsight-price > strong').text("R$ "+ val_desc);
+                            {% endif %}
+                    }
+                    
+        					</script>
+                            
+                            
+                            
         		          	{% if product.options|count > 0 %}
         						<div class="prod-variants clearfix">
         							<ul>		
@@ -90,6 +168,9 @@
             </div>
         </div>
     {% endfor %}
+    
+    
+    
     <div class="prod-action look-prod-action">
         
             <div class="look-prod-action-1">
@@ -108,15 +189,16 @@
         
         
             <div class="look-prod-action-2">
-                
+  
+                <!--  
                 <div class="seletor-quantidade look-prod-action-2-1">
-<!--                  <span class="text-quant">Quant.</span>-->
+                <span class="text-quant">Quant.</span>
                         <select name="quantity" class="quant-select">
                             {% for i in 1..product.quantity %}
                                 <option value="{{i}}">{{i}}</option>
                             {% endfor %}
                         </select>
-    				    </div>
+    				    </div>-->
                 
                 
                 <div class="buffer-top-sm buffer-bottom-sm look-prod-action-2-2">
@@ -136,6 +218,8 @@
                         <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-570c00638e25a472"></script>
                     </div>
 					       {% endif %}
+                
+            
       
                 <!--  FRETE E PRAZO    -->
 						  {% if template_settings('if:catalog') == 0  and template_settings('if:calc_ship') == 1 and product.shippable == 1 %}

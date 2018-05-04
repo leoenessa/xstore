@@ -65,7 +65,7 @@
     			<div class="row">
     				<div class="col-xs-12">
     					{% if flashdata.error %}
-    					<div class="alert alert-danger">
+    					<div class="alert alert-danger teste">
     						{{ flashdata.error }}
     						<a class="close-alert">{{'fechar'|trans({'en':'close'})}}</a>
     					</div>
@@ -310,14 +310,30 @@
             <h2>@Instagram</h2>
         </div>
 -->
-
-
+        
 {# INSTAGRAM #}
 {% block instagram %}
 {% endblock %}
                 
     	{# FOOTER #}
+        
+        
 		<footer>
+        <h3></h3>
+<!--
+        {% for product in products %}
+                    {% if product.id == 3555690 %}
+                        <h3>{{product.id}}</h3>
+                        
+                    {% else%}
+                        
+                        {% for variante in product.variants %}
+                            <h4 style="color: white">{{variante.id}}</h4>
+                            <h4 style="color: white">{{variante.quantity }}</h4>
+                        {% endfor %}
+                    {% endif %}
+        {% endfor %}
+-->
     		<div class="container{{ template_settings('if:force_footer') and template_settings('if:force_content') ? '-fluid' : '' }}">
             <div class="text-center logo-footer">
                 <img src="{{ theme_url('assets/img/logo-fundopreto.gif') }}" alt="{{ shop_config('company_name') }}">

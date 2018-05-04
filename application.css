@@ -440,6 +440,7 @@
     #flash .alert{
         border-radius:0px;
         margin:10px;
+        z-index: 10;
     }
 
     #flash .close-alert{
@@ -2034,6 +2035,7 @@
 
     #product .prod-action .buy-btn-form .alert-danger{
       background: #d32929;
+        z-index: 10;
       color: #fffafa;
       border: none;
       border-radius: 0;

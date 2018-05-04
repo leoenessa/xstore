@@ -86,11 +86,6 @@
             		{% endif %}
 				</div>
 				<div class="produto-conteudo1-direita">
-            <script>
-                $.get("https://lojaxstore.xtechcommerce.com/api-v1/variants?product_id=3555690",function(data){
-                    console.log(data);
-                });
-            </script>
 					{# Titulo #}
 					<h1 class="prod-title" itemprop="name">
 						{{ product.name }}
@@ -197,6 +192,20 @@
                             {% endfor %}
                        }   
 
+                      
+                      function setMaxSelect(num,id){ //DEFINE A QUANTIDADE NO SELECT DO PRODUTO
+                        var select = $("select[name=quantity]");
+                        select.empty();
+                        
+                          
+                        for(i=1;i<=num;i++){
+                          select.append($('<option>',{
+                              value:i,
+                              text:i
+                          }))  
+                        }
+                      }
+                      
                       productvariants_settings_{{ product.id }}.validationSuccess = function(){
                             //  Weight
                             var s_id = this['selected_variant']['id'];
@@ -207,6 +216,8 @@
                             $('.installment-price').text('R$ ' + (parseFloat(this.selected_variant.price_num) / {{ product.installments }}).toFixed(2).replace('.', ','));
                             $('.estoque').show();
                             $('.estoque span').html(parseInt(this.selected_variant.quantity));
+                          console.log(this.selected_variant.id);
+                          setMaxSelect(this.selected_variant.quantity,{{ product.id }});
                             $('#buy-btn').show();
 
                             variant_pay_discount(this.selected_variant);
@@ -339,6 +350,13 @@
                                 <option value="{{i}}">{{i}}</option>
                             {% endfor %}
                         </select>
+                        
+                        
+                        <script>
+                            
+                        </script>
+                        
+                        
     							 </div>
     							</div> <!--============================ -->
     							{% if template_settings('if:catalog') == 0 %}
