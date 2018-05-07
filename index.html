@@ -232,7 +232,7 @@
                             {% if not payment_methods %}
                                 <div class="container-busca">
                                     <a id="botao-wishlist" href="{{ site_url('secure/my_account#wishlist') }}" class="lista-de-desejos">
-                                        <i class="glyphicon glyphicon-heart-empty"></i>
+                                        <i class="fa fa-heart-o"></i>
                                     </a>
                                     {# Busca #} 
                                     {{ form_open('cart/search', {id: "form-search"}) }}
@@ -272,6 +272,19 @@
                                       $('#top-search .campo-busca-produto').hide(1000);
                                      $("#top-search #botao-wishlist").fadeIn(1200);
                                     $('#top-search #botao-buscar').fadeIn(1200);
+                                });
+                                
+                                $('#botao-wishlist').hover(function(){
+                        
+                                    var wish_i = $(this).find("i");
+                                    wish_i.removeClass("fa-heart-o");
+                                    wish_i.addClass("fa-heart");
+
+                                }, function(){
+                                    var wish_i = $(this).find("i");
+                                    console.log("NO HOOOVER");
+                                    wish_i.removeClass("fa-heart");
+                                    wish_i.addClass("fa-heart-o");
                                 });
                                 
                             </script>
@@ -319,21 +332,7 @@
         
         
 		<footer>
-        <h3></h3>
-<!--
-        {% for product in products %}
-                    {% if product.id == 3555690 %}
-                        <h3>{{product.id}}</h3>
-                        
-                    {% else%}
-                        
-                        {% for variante in product.variants %}
-                            <h4 style="color: white">{{variante.id}}</h4>
-                            <h4 style="color: white">{{variante.quantity }}</h4>
-                        {% endfor %}
-                    {% endif %}
-        {% endfor %}
--->
+        
     		<div class="container{{ template_settings('if:force_footer') and template_settings('if:force_content') ? '-fluid' : '' }}">
             <div class="text-center logo-footer">
                 <img src="{{ theme_url('assets/img/logo-fundopreto.gif') }}" alt="{{ shop_config('company_name') }}">
