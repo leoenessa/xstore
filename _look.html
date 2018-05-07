@@ -11,15 +11,15 @@
                 <div class="lookitem-conteudo-direita">
                     
                     
-                    <label>
+                    <label class="label-infos-variacao">
                         {{ form_input({'name': 'product[' ~ product.id ~ '][variant_id]', 'value': '', 'type': 'hidden', 'id': 'lookitem-variant-' ~ product.id}) }}
                         {{ form_input({'name': 'product[' ~ product.id ~ '][id]', 'value': product.id, 'type': 'hidden'}) }}
                     </label>
                     <div class="options clearfix">
                         
                         
-                        <div class="prod-variant-li escolha-checkbox conteudo-look-titulo">
-                                <input type="checkbox" id="{{product.id}}" name="vehicle" value="Bike" checked><label for="{{product.id}}">Incluir este produto</label>
+                        <div class="prod-variant-li escolha-checkbox conteudo-look-titulo" id="escolha-produto">
+                                <input type="checkbox" checked data-state="1"><label for="{{product.id}}">Incluir este produto</label>
                             
 <!--
                                 <select name="quantity" class="quant-select">
@@ -97,45 +97,49 @@
                                 $('.onsight-price > strong').text("R$ "+ val_desc);
                             {% endif %}
                     }
-                    
-        					</script>
+
+                  	var opcoes_{{product.id}} = productvariants_settings_{{product.id}}.variant_map;
+
+                                     
+                            </script>
                             
                             
                             
-        		          	{% if product.options|count > 0 %}
-        						<div class="prod-variants clearfix">
-        							<ul>		
-        								{% for option in product.options %}
-        									<li class="prod-variant-li clearfix">
-        										<div class="prod-variant">
-        											<span class="prod-variant-title">
+                            {% if product.options|count > 0 %}
+                                <div class="prod-variants clearfix">
+                                    <ul>        
+                                        {% for option in product.options %}
+                                            <li class="prod-variant-li clearfix">
+                                                <div class="prod-variant">
+                                                    <span class="prod-variant-title">
                                   {% if option.name == 'Tamanho'%}
                                     {{ 'Escolha o tamanho:'|trans({'en':'Select a option for'}) }}
                                   {%else%}
-        												    {{ 'Selecione a opção para'|trans({'en':'Select a option for'}) }}
-        												    <span class="color">{{option.name}}:</span>
+                                                            {{ 'Selecione a opção para'|trans({'en':'Select a option for'}) }}
+                                                            <span class="color">{{option.name}}:</span>
                                   {% endif %}
-        											</span>
-        											<ul class="list-inline">
-        												{% for value in option.values %}
-        						          	    			{% if value.color %}
-        							          	    			<li class="l-color">
-        								          	    			<button data-id="{{value.id}}" id="filter_{{ value.id }}" class="sub f-color prod-variant-btn prod-variant-color" href="#filter_{{ option.id }}" title="{{ options[0] }}">
-        								          	    				<span class="s-color" style="background: {{ value.color }};"></span>
-        							          	    				</button>
-        							          	    			</li>
-        						      	    				{% else %}
-        														<li>
-        															<button class="sub btn btn-default prod-variant-btn look-variant-size" data-id="{{value.id}}">{{value.name}}</button>
-        														</li>
-        													{% endif %}	
-        												{% endfor %}
-        											</ul>
-        										</div>
-        									</li>
-        								{% endfor %}
-        							</ul>
-    							    {% for option in product.options %}
+                                                    </span>
+                                                    <ul class="list-inline">
+                                                        {% for value in option.values %}
+                                                            {% if value.color %}
+                                                                <li class="l-color">
+                                                                    <button data-id="{{value.id}}" data-product="{{product.id}}" id="filter_{{ value.id }}" class="sub f-color prod-variant-btn prod-variant-color" href="#filter_{{ option.id }}" title="{{ options[0] }}">
+                                                                        <span class="s-color" style="background: {{ value.color }};"></span>
+                                                                    </button>
+                                                                </li>
+                                                            {% else %}
+                                                                <li>
+                                                                    <button data-product="{{product.id}}" class="sub btn btn-default prod-variant-btn look-variant-size" data-id="{{value.id}}">{{value.name}}</button>
+                                                                </li>
+
+                                                            {% endif %} 
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% for option in product.options %}
                                         {% if option.id in product.available_options %}
                                             {% if option.type == 'textarea' %}
                                                 <label>{{ option.name }}</label>
@@ -146,8 +150,8 @@
                                             {% endif %}
                                         {% endif %}
                                     {% endfor %}
-        						</div>
-        					{% endif %}
+                                </div>
+                            {% endif %}
                             
                             <script type="text/javascript">
                                 $(document).ready(function(){
@@ -161,7 +165,7 @@
                         <div class="price conteudo-look-preco">
 <!--                            <span class="buy-message hide pull-right"></span>-->
                             <span class="product_price single_price">{{ product.price|format_currency }}</span>
-							<span class="single_price variant_price" style="display: none;" data-variant={{product.id}}>{{ product.price|format_currency }}</span>
+                            <span class="single_price variant_price" style="display: none;" data-variant={{product.id}}>{{ product.price|format_currency }}</span>
                         </div>
                     </div>
                 </div>
@@ -170,6 +174,44 @@
     {% endfor %}
     
     
+    <script>
+
+    //Este script colhe o click no botao de variacao de tamanho e seta o campo label para fazer
+    //funcionar o botao compra. Para conseguir ter variavel com nome variavel, se utiliza de uma
+    //técnica de acessar a variavel pelo window[]
+    	
+    		$(".prod-variant-btn").click(function(){
+
+    				var id_produto = $(this).data('product');
+    				var variacao = $(this).data('id');
+    				var id_variacao = window['opcoes_'+id_produto][variacao].id;
+    				$("#lookitem-variant-"+id_produto).attr("value",id_variacao);
+    				
+    		});
+
+        
+    /*
+        Este script serve para comentar os labels responsaveis por guardar informacao da variant. Comentando estas linhas esta variant nao e adicionada ao carrinho, fazendo desta forma possivel nao comprar certos itens do look
+    */
+        
+        $("#escolha-produto").click(function(){
+            var variacao_produto = $(this).closest(".lookitem-conteudo-direita").find("label");
+            var comentado = document.createComment(variacao_produto.get(0).outerHTML);    
+            
+            if($(this).find("input[type=checkbox]").attr("data-state") == 1){
+                variacao_produto.replaceWith(comentado);
+                $(this).attr("data-state",0);
+            }
+            else{
+                $(comentado).replaceWith(comentado.nodeValue);
+                $(this).attr("data-state",1);
+            }
+            
+                
+            
+        });
+
+    </script>
     
     <div class="prod-action look-prod-action">
         
@@ -198,7 +240,7 @@
                                 <option value="{{i}}">{{i}}</option>
                             {% endfor %}
                         </select>
-    				    </div>-->
+                        </div>-->
                 
                 
                 <div class="buffer-top-sm buffer-bottom-sm look-prod-action-2-2">
@@ -217,14 +259,14 @@
                         <script type="text/javascript">var addthis_config = {"data_track_addressbar":false, ui_language: "pt"};</script>
                         <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-570c00638e25a472"></script>
                     </div>
-					       {% endif %}
+                           {% endif %}
                 
             
       
                 <!--  FRETE E PRAZO    -->
-						  {% if template_settings('if:catalog') == 0  and template_settings('if:calc_ship') == 1 and product.shippable == 1 %}
-    					    {{ shipping_widget() }}
-    					{% endif %}
+                          {% if template_settings('if:catalog') == 0  and template_settings('if:calc_ship') == 1 and product.shippable == 1 %}
+                            {{ shipping_widget() }}
+                        {% endif %}
             </div>
         
     </div>
