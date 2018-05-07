@@ -170,6 +170,7 @@
 <!--                {{ wishlist_button('<i class="glyphicon glyphicon-heart"></i>&nbsp;&nbsp;'~'Lista de Desejo'|trans({'en':'Wishlist'}), product, '', true) }}	-->
 								<script>
 									$('.add-to-wishlist').find('button').removeClass('btn-sm btn-default').addClass('btn-primary');
+                   
 								</script>									
 							</div>
 						</div>
@@ -328,39 +329,62 @@
             
     					{% if template_settings('if:catalog') == 0 or product.price > 0 %}
     					<div class="prod-action">
-    						<div class="row">
+    						<div class="row center-flex">
                     
-                    {% if product.track_stock == 1 and product.quantity <= 0 %}
+                    {% if product.track_stock == 1 and product.quantity<=0 %}
                         <div class="col-xs-12">
                             
-                            <h2>PRODUTO INDISPONIVEL</h2>
+                            <h2 class="produto-indisponivel">Produto indisponível</h2>
                             
                         </div>
                                                                            
                     {% else %}
                         
-                  <div class="col-xs-3">
+                  <div class="col-xs-3 flex-container-30">
                       <!-- QUANTIDADE DE PRODUTO            -->
                       
                       
     								<div class="seletor-quantidade">
 <!--                  <span class="text-quant">Quant.</span>-->
-                        <select name="quantity" class="quant-select">
+                            <select id="produto-quantidade" name="quantity" class="quant-select">
                             {% for i in 1..product.quantity %}
                                 <option value="{{i}}">{{i}}</option>
                             {% endfor %}
-                        </select>
+                            </select>
+                            
+                            <div class="btns-controle-quantidade">
+                                <button type="button" class="mais">
+                                    <i class="glyphicon glyphicon-chevron-up"></i>
+                                </button>
+                                <button type="button" class="menos">
+                                    <i class="glyphicon glyphicon-chevron-down"></i>
+                                </button>
+                            </div>
                         
                         
                         <script>
+                            $(".mais").click(function(){
+                                var campo_qtde = $(this).closest('.seletor-quantidade').find('select[name="quantity"]');
+                                var qtde_atual = parseInt(campo_qtde.val());
+                                campo_qtde.val(qtde_atual+1);
+                                console.log(qtde_atual);
+                                
+                            });
                             
+                            $(".menos").click(function(){
+                                console.log("menos");
+                                var campo_qtde = $(this).closest('.seletor-quantidade').find('select[name="quantity"]');
+                                var qtde_atual = parseInt(campo_qtde.val());
+                                campo_qtde.val(qtde_atual-1);
+                                console.log(qtde_atual);
+                            });
                         </script>
                         
                         
     							 </div>
     							</div> <!--============================ -->
     							{% if template_settings('if:catalog') == 0 %}
-    							<div class="col-xs-9">
+    							<div class="col-xs-9 flex-container-70">
     							    {% if template_settings('if:qtd_estoque') == 1 %}
     							        <p class="estoque">Temos <span>{{ product.quantity }}</span> no estoque</p>
     							    {% endif %}
@@ -388,23 +412,26 @@
                     {% endif %}
     							
     						</div>
+<!--            AVISE ME QUANDO CHEGAR // RETIRADO PELO LAYOUT
+
     						<div class="row">
     							<div class="col-xs-12">
     								{{ form_open('contact/remind_me', 'class="remindme-form hide form-horizontal"', {'redirect': site_url(uri_string()), 'variant_id': '', '    product_id': product.id}) }}
-    									<fieldset>
+    									<fieldset class="avise-me">
     										<label for="email">
     								  			{{ lang('remind_me_when_available') }}
     										</label>
-    									    <div class="input-group">
+    								    <div class="input-group">
     									      <input type="text" name="email" class="form-control" placeholder="Email" />
     									      <span class="input-group-btn">
     									        <input type="submit" value="{{ 'Enviar'|trans({'en':'Send'}) }}" name="submit" class="btn btn-primary"/>
     									      </span>
-    									    </div>
+    									  </div>
     									</fieldset>
     								{{ form_close() }}
     							</div>
     						</div>
+-->
     					</div>
     					{% endif %}
       
