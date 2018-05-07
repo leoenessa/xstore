@@ -215,6 +215,25 @@
                     $('.wish-alert').on('click', function(){
                         $(this).removeClass('mostra-wish-alert');
                     })
+                    
+                    
+                    
+                    
+                    
+                    
+                    $('.add-to-wishlist').hover(function(){
+                        
+                        var wish_i = $(this).find("i");
+                       console.log("HOOOVER");
+                       wish_i.removeClass("fa-heart-o");
+                        wish_i.addClass("fa-heart");
+                            
+                   }, function(){
+                        var wish_i = $(this).find("i");
+                       console.log("NO HOOOVER");
+                       wish_i.removeClass("fa-heart");
+                       wish_i.addClass("fa-heart-o");
+                    });
                 </script>        
                 
                 
